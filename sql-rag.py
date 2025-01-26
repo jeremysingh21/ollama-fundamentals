@@ -77,10 +77,10 @@ except Exception as e:
     try:
         with engine.connect() as conn:
             result = conn.execute(text(query))
-            # Convert rows to Document objects with proper structure
+            # Convert rows to Document objects with better structured content
             data = [
                 Document(
-                    page_content=str(row),  # Main content
+                    page_content="\n".join([f"{k}: {v}" for k, v in row.items()]),  # Better formatted content
                     metadata=dict(row)      # Preserve structured data as metadata
                 )
                 for row in result.mappings()  # Get rows as dictionaries
@@ -146,11 +146,12 @@ retriever = MultiQueryRetriever.from_llm(
 )
 
 # RAG prompt template
-template = """Answer the question based ONLY on the following database records:
+template = """You are a real estate data expert. Answer the question based ONLY on the following database records:
 {context}
+
 Question: {question}
 
-Provide a clear and concise answer based on the database information."""
+Provide a clear and concise answer based on the database information. If the question requires specific details, extract them from the records and present them in a structured format. For property listings, include relevant details like location, size, and contact information when available."""
 
 prompt = ChatPromptTemplate.from_template(template)
 
@@ -174,7 +175,19 @@ if __name__ == "__main__":
     question = "Give me a list of all properties with that is property type of retail in new york. Make it a bulleted list with numbers and show all the details."
     result = chain.invoke(input=question)
     print("\nQuestion:", question)
-    print("\nAnswer:", result) 
+    print("\nAnswer:", result)
+
+def clean_property_data(record):
+    # Clean up lists stored as strings
+    if isinstance(record.get('property_type'), str):
+        record['property_type'] = record['property_type'].strip("[]").replace("'", "")
+    # Clean up broker information
+    if isinstance(record.get('broker'), str):
+        record['broker'] = ", ".join(set([b.strip() for b in record['broker'].strip("[]").split(",") if b.strip()]))
+    return record
+
+# Apply cleaning before creating documents
+data = [clean_property_data(row) for row in result.mappings()]
 
 
 
