@@ -4,7 +4,7 @@ import json
 url = "http://localhost:11434/api/generate"
 
 data = {
-    "model": "llama3.2",
+    "model": "llama3.1",
     "prompt": "tell me a short story and make it funny.",
 }
 

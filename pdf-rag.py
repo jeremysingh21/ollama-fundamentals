@@ -6,15 +6,15 @@
 # 6. retrieve the similar documents and present them to the user
 ## run pip install -r requirements.txt to install the required packages
 
-from langchain_community.document_loaders import UnstructuredPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.document_loaders import OnlinePDFLoader
 
 doc_path = "./data/BOI.pdf"
-model = "llama3.2"
+model = "deepseek-r1"
 
 # Local PDF file uploads
 if doc_path:
-    loader = UnstructuredPDFLoader(file_path=doc_path)
+    loader = PyPDFLoader(file_path=doc_path)
     data = loader.load()
     print("done loading....")
 else:
