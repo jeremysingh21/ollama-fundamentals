@@ -3,6 +3,7 @@
 
 # ignore the venv folder
 venv/
+vevn/
 
 # ignore the .vscode folder
 .vscode/
